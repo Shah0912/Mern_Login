@@ -2,12 +2,17 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
+// require('dotenv');
+require('dotenv').config()
+
 const keys = require("../../config/keys");
 
 
 // Load input validation
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
+const validateForgotPasswordInput = require("../../validation/forgotpwd");
 
 
 const User = require("../../models/User");
@@ -19,6 +24,7 @@ router.post("/register", (req, res) => {
         return res.status(400).json(errors);
     }
     User.findOne({ email: req.body.email }).then(user => {
+        console.log("user = ", user);
         if (user) {
             return res.status(400).json({ email: "Email already exists" });
         } else {
@@ -87,6 +93,67 @@ router.post("/login", (req, res) => {
                 return res.status(400).json({ passwordincorrect: "Password is incorrect" });
             }
         });
+    });
+
+});
+
+
+router.put("/forgot-password", (req, res) => {
+    const { errors, isValid } = validateForgotPasswordInput(req.body);
+    
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
+    const email = req.body.email;
+    // console.log("email = ", email);
+    User.findOne({ email: req.body.email }).then(user => {
+        // console.log("user = ", user);
+        if(!!!user) {
+            return res.status(400).json({error: "User with this email doesn't exist!"});
+        }
+        
+        const token = jwt.sign({id: user.id}, keys.resetKey, {expiresIn: '20m'});
+        const mailOptions = {
+            from : process.env.EMAIL,
+            to: email,
+            subject: 'Password Reset Link',
+            html:
+            `
+                <h2>Please click on the given link to reset your password</h2>
+                <p>${process.env.CLIENT_URL}/resetpassword/${token}</p>
+            `
+        };
+
+        user.updateOne({resetLink: token}, (err, success) => {
+            if(err) {
+                return res.status(400).json({error: "error in the reset link"});
+            }
+            else {
+                // console.log(process.env.EMAIL);
+                // console.log(process.env.PASSWORD);
+                let transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: process.env.EMAIL, 
+                        pass: process.env.PASSWORD, // generated ethereal password
+                    },
+                });
+
+                transporter.sendMail(mailOptions, function(error, info){
+                    if (error) {
+                      console.log(error);
+                      return res.status(400).json({error: error});
+                    } else {
+                      console.log('Email sent: ' + info.response);
+                    }
+                  }); 
+                
+            }
+        });
+
     });
 
 });

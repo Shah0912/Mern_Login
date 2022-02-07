@@ -16,7 +16,11 @@ const UserSchema = new Schema({
   date: {
     type: Date,
     default: Date.now
+  },
+  resetLink: {
+    data: String,
+    default: ''
   }
-});
+}, {timestamps: true});
 
 module.exports = User = mongoose.model("users", UserSchema);
