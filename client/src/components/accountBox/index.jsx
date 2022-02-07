@@ -4,6 +4,7 @@ import { LoginForm } from "./loginForm";
 import { motion } from "framer-motion";
 import { AccountContext } from "./accountContext";
 import { SignupForm } from "./signupForm";
+import {ForgotPasswordForm} from "./forgotPasswordForm";
 
 const BoxContainer = styled.div`
   width: 280px;
@@ -118,7 +119,25 @@ export function AccountBox(props) {
     }, 400);
   };
 
-  const contextValue = { switchToSignup, switchToSignin };
+  const switchToForgotPassword = () => {
+    playExpandingAnimation();
+    setTimeout(() => {
+      setActive("forgotPassword");
+    }, 400);
+  };
+
+  const registrationSuccess = () => {
+    setExpanded(true);
+    setActive("registrationSuccess");
+    setTimeout(()=>{
+      setExpanded(false);
+    },3000);
+    setTimeout(() => {
+      setActive("signin");
+    }, 3400);
+  }
+
+  const contextValue = { switchToSignup, switchToSignin, registrationSuccess,switchToForgotPassword };
 
   return (
     <AccountContext.Provider value={contextValue}>
@@ -143,10 +162,25 @@ export function AccountBox(props) {
               <SmallText>Please sign-up to continue!</SmallText>
             </HeaderContainer>
           )}
+          {active === "registrationSuccess" && (
+            <HeaderContainer>
+              <HeaderText>Registered</HeaderText>
+              <HeaderText>Successfully!</HeaderText>
+              <SmallText>Please login to continue!</SmallText>
+            </HeaderContainer>
+          )}
+          {active === "forgotPassword" && (
+            <HeaderContainer>
+              <HeaderText>Forgot</HeaderText>
+              <HeaderText>Password</HeaderText>
+              <SmallText>Please enter details to continue!</SmallText>
+            </HeaderContainer>
+          )}
         </TopContainer>
         <InnerContainer>
           {active === "signin" && <LoginForm />}
           {active === "signup" && <SignupForm />}
+          {active === "forgotPassword" && <ForgotPasswordForm />}
         </InnerContainer>
       </BoxContainer>
     </AccountContext.Provider>
