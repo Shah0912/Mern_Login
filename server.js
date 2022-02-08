@@ -15,7 +15,6 @@ app.use(express.urlencoded());
 
 
 // DB Config
-// const db = require("./config/keys").mongoURI;
 const db = process.env.mongoURI;
 
 mongoose
