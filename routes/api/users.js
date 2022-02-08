@@ -176,14 +176,14 @@ router.put("/forgot-password", (req, res) => {
 
 
 router.put('/reset-password', (req, res) => {
-    const email = req.body.email;
+    // const email = req.body.email;
     const {resetLink, newPass, date} = req.body;
     console.log("resetLink = ", resetLink);
     console.log("new Pass = ", newPass);
     if(resetLink) {
         jwt.verify(resetLink, process.env.resetKey, (err, decodedToken) => {
             if(err) {
-                console.log("decoded token = ", decodedToken);
+                // console.log("decoded token = ", decodedToken);
                 console.log("err = ", err);
                 return res.status(400).json({error: "Expired Link"});
             } 
