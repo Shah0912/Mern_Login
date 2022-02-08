@@ -121,7 +121,7 @@ router.put("/forgot-password", (req, res) => {
             html:
             `
                 <h2>Please click on the given link to reset your password</h2>
-                <p>${process.env.CLIENT_URL}/resetpassword/${token}</p>
+                <p><a>${process.env.CLIENT_URL}/resetpassword/${token}</a></p>
             `
         };
 
