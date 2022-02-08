@@ -14,6 +14,7 @@ require('dotenv').config()
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
 const validateForgotPasswordInput = require("../../validation/forgotpwd");
+const validateResetPasswordInput = require("../../validation/resetpwd");
 
 
 const User = require("../../models/User");
@@ -25,7 +26,6 @@ router.post("/register", (req, res) => {
         return res.status(400).json(errors);
     }
     User.findOne({ email: req.body.email }).then(user => {
-        console.log("user = ", user);
         if (user) {
             return res.status(400).json({ email: "Email already exists" });
         } else {
@@ -54,7 +54,7 @@ router.post("/register", (req, res) => {
 // @desc Login user and return JWT token
 // @access Public
 router.post("/login", (req, res) => {
-    const { error, isValid } = validateLoginInput(req.body);
+    const { errors, isValid } = validateLoginInput(req.body);
 
     if (!isValid) {
         return res.status(400).json(errors);
@@ -101,7 +101,7 @@ router.post("/login", (req, res) => {
 
 router.put("/forgot-password", (req, res) => {
     const { errors, isValid } = validateForgotPasswordInput(req.body);
-    
+
     if (!isValid) {
         return res.status(400).json(errors);
     }
@@ -110,8 +110,8 @@ router.put("/forgot-password", (req, res) => {
     // console.log("email = ", email);
     User.findOne({ email: req.body.email }).then(user => {
         // console.log("user = ", user);
-        if(!!!user) {
-            return res.status(400).json({error: "User with this email doesn't exist!"});
+        if (!!!user) {
+            return res.status(400).json({ error: "User with this email doesn't exist!" });
         }
         const payload = {
             id: user.id,
@@ -129,21 +129,19 @@ router.put("/forgot-password", (req, res) => {
         // console.log("payload = ", payload);
         // const token = jwt.sign({id: user.id}, keys.resetKey, {expiresIn: 100});
         const mailOptions = {
-            from : process.env.EMAIL,
+            from: process.env.EMAIL,
             to: email,
             subject: 'Password Reset Link',
-            html:
-            `
+            html: `
                 <h2>Please click on the given link to reset your password</h2>
                 <p><a>${process.env.CLIENT_URL}/resetpassword/${token}</a></p>
             `
         };
         // console.log("token = ", token);
-        user.updateOne({resetLink: token}, (err, success) => {
-            if(err) {
-                return res.status(400).json({error: "error in the reset link"});
-            }
-            else {
+        user.updateOne({ resetLink: token }, (err, success) => {
+            if (err) {
+                return res.status(400).json({ error: "error in the reset link" });
+            } else {
                 // console.log(process.env.EMAIL);
                 // console.log(process.env.PASSWORD);
                 let transporter = nodemailer.createTransport({
@@ -151,25 +149,25 @@ router.put("/forgot-password", (req, res) => {
                     port: 587,
                     secure: false,
                     auth: {
-                        user: process.env.EMAIL, 
+                        user: process.env.EMAIL,
                         pass: process.env.PASSWORD, // generated ethereal password
                     },
                 });
 
-                transporter.sendMail(mailOptions, function(error, info){
+                transporter.sendMail(mailOptions, function(error, info) {
                     if (error) {
-                      console.log(error);
-                      return res.status(400).json({error: error});
+                        console.log(error);
+                        return res.status(400).json({ error: error });
                     } else {
-                      console.log('Email sent: ' + info.response);
+                        console.log('Email sent: ' + info.response);
                     }
-                }); 
-                
-                return res.status(200).json({success: true, token: token});
-                
+                });
+
+                return res.status(200).json({ success: true, token: token });
+
             }
         });
-        
+
     });
 
 });
@@ -177,19 +175,21 @@ router.put("/forgot-password", (req, res) => {
 
 router.put('/reset-password', (req, res) => {
     // const email = req.body.email;
-    const {resetLink, newPass, date} = req.body;
-    console.log("resetLink = ", resetLink);
-    console.log("new Pass = ", newPass);
-    if(resetLink) {
+    const { errors, isValid } = validateResetPasswordInput(req.body);
+
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+    const { resetLink, newPass, date } = req.body;
+    if (resetLink) {
         jwt.verify(resetLink, process.env.resetKey, (err, decodedToken) => {
-            if(err) {
+            if (err) {
                 // console.log("decoded token = ", decodedToken);
-                console.log("err = ", err);
-                return res.status(400).json({error: "Expired Link"});
-            } 
-            User.findOne({resetLink}, (err, user)=> {
-                if(!!!user) {
-                    return res.status(400).json({error: "User with this token doesn't exist!"});
+                return res.status(400).json({ error: "Expired Link" });
+            }
+            User.findOne({ resetLink }, (err, user) => {
+                if (!!!user) {
+                    return res.status(400).json({ error: "User with this token doesn't exist!" });
                 }
                 const obj = {
                     resetLink: "",
@@ -200,19 +200,17 @@ router.put('/reset-password', (req, res) => {
                     bcrypt.hash(newPass, salt, (err, hash) => {
                         if (err) throw err;
                         obj.password = hash;
+                        user = _.extend(user, obj);
+                        user.save()
+                            .then(user => res.json(user))
+                            .catch(err => console.log(err));
                     });
                 });
-
-                user = _.extend(user, obj);     
-                user.save()
-                .then(user => res.json(user))
-                .catch(err => console.log(err));
             });
         });
-    }
-    else {
-        return res.status(400).json({error: "Reset Link error"});
+    } else {
+        return res.status(400).json({ error: "Reset Link error" });
     }
 });
 
-module.exports = router; 
+module.exports = router;

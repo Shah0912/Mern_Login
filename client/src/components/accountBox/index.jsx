@@ -137,7 +137,13 @@ export function AccountBox(props) {
     }, 3400);
   }
 
-  const contextValue = { switchToSignup, switchToSignin, registrationSuccess,switchToForgotPassword };
+  const forgotPasswordSuccess = () => {
+    setExpanded(true);
+    setActive("forgotPasswordSuccess");
+  }
+
+  const contextValue = { switchToSignup, switchToSignin, registrationSuccess
+    ,switchToForgotPassword, forgotPasswordSuccess};
 
   return (
     <AccountContext.Provider value={contextValue}>
@@ -174,6 +180,13 @@ export function AccountBox(props) {
               <HeaderText>Forgot</HeaderText>
               <HeaderText>Password</HeaderText>
               <SmallText>Please enter details to continue!</SmallText>
+            </HeaderContainer>
+          )}
+          {active === "forgotPasswordSuccess" && (
+            <HeaderContainer>
+              <HeaderText>Reset</HeaderText>
+              <HeaderText>Link Sent!</HeaderText>
+              <SmallText>Please check registered email!</SmallText>
             </HeaderContainer>
           )}
         </TopContainer>

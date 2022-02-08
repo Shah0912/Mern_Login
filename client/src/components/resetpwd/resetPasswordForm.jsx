@@ -1,26 +1,24 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useContext } from "react";
 import {
-  BoldLink,
   BoxContainer,
   FormContainer,
   Input,
-  MutedLink,
   SubmitButton,
-} from "./common";
+} from "../accountBox/common";
 import { Marginer } from "../marginer";
-import { AccountContext } from "./accountContext";
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import {ResetContext} from '../accountBox/accountContext';
 
-export function ForgotPasswordForm(props) {
+export function ResetPasswordForm({token}) {
 
-  const {switchToSignin, forgotPasswordSuccess} = useContext(AccountContext);
+  const {resetPasswordSuccess} = useContext(ResetContext);
 
   const submit = (e) => {
-    e.preventDefault();
-    axios.put('/api/users/forgot-password',values)
+    e.preventDefault()
+    axios.put('/api/users/reset-password',values)
     .then((res) => {
-      forgotPasswordSuccess()
+      resetPasswordSuccess()
     }).catch((err) => {
       let errors = err.response.data
       for (var key in errors) {
@@ -28,11 +26,12 @@ export function ForgotPasswordForm(props) {
       }
     })
   }
-
+  
   const notify = (data) => toast.error(data);
 
   const [values,setValues] = useState({
-    email:''
+    newPass:'',
+    resetLink:token
   })
 
   const handleInputChange = e => {
@@ -46,17 +45,11 @@ export function ForgotPasswordForm(props) {
   return (
     <BoxContainer>
       <FormContainer>
-        <Input type="email" placeholder="Email" name='email' value={values.email} onChange={handleInputChange}/>
+        <Input type="password" placeholder="New Password" name='newPass' value={values.newPass} onChange={handleInputChange}/>
       </FormContainer>
       <Marginer direction="vertical" margin={10} />
-      <SubmitButton type="submit" onClick={submit}>Submit</SubmitButton>
+      <SubmitButton style={{marginTop:'20px'}} type="submit" onClick={submit}>Submit</SubmitButton>
       <Marginer direction="vertical" margin="1em" />
-      <MutedLink href="#">
-        Remember your Password?
-        <BoldLink href="#" onClick={switchToSignin}>
-          Login
-        </BoldLink>
-      </MutedLink>
       <Toaster position="top-center" toastOptions={{duration:4000}}/>
     </BoxContainer>
   );
