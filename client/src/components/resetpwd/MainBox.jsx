@@ -99,7 +99,7 @@ export default function MainBox({token}) {
     const resetPasswordSuccess = () => {
       setExpanded(true);
       setTimeout(() => {
-        window.location.replace("http://localhost:3000")
+        window.location.replace("https://loginsystem5862.herokuapp.com/")
         }, 4000);
     }
 
