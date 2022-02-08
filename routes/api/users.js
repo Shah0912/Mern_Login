@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
+const _ = require('lodash');
 // require('dotenv');
 require('dotenv').config()
 
@@ -112,8 +113,21 @@ router.put("/forgot-password", (req, res) => {
         if(!!!user) {
             return res.status(400).json({error: "User with this email doesn't exist!"});
         }
-        
-        const token = jwt.sign({id: user.id}, keys.resetKey, {expiresIn: '20m'});
+        const payload = {
+            id: user.id,
+            data: Date.now()
+        };
+        // Sign the token
+
+        const token = jwt.sign(
+            payload,
+            keys.resetKey, {
+                expiresIn: 8640
+            }
+        );
+        console.log("token = ", token);
+        console.log("payload = ", payload);
+        // const token = jwt.sign({id: user.id}, keys.resetKey, {expiresIn: 100});
         const mailOptions = {
             from : process.env.EMAIL,
             to: email,
@@ -124,7 +138,7 @@ router.put("/forgot-password", (req, res) => {
                 <p><a>${process.env.CLIENT_URL}/resetpassword/${token}</a></p>
             `
         };
-
+        // console.log("token = ", token);
         user.updateOne({resetLink: token}, (err, success) => {
             if(err) {
                 return res.status(400).json({error: "error in the reset link"});
@@ -149,13 +163,56 @@ router.put("/forgot-password", (req, res) => {
                     } else {
                       console.log('Email sent: ' + info.response);
                     }
-                  }); 
+                }); 
+                
+                return res.status(200).json({success: true, token: token});
                 
             }
         });
-
+        
     });
 
 });
 
-module.exports = router;
+
+router.put('/reset-password', (req, res) => {
+    const email = req.body.email;
+    const {resetLink, newPass, date} = req.body;
+    console.log("resetLink = ", resetLink);
+    console.log("new Pass = ", newPass);
+    if(resetLink) {
+        jwt.verify(resetLink, keys.resetKey, (err, decodedToken) => {
+            if(err) {
+                console.log("decoded token = ", decodedToken);
+                console.log("err = ", err);
+                return res.status(400).json({error: "Expired Link"});
+            } 
+            User.findOne({resetLink}, (err, user)=> {
+                if(!!!user) {
+                    return res.status(400).json({error: "User with this token doesn't exist!"});
+                }
+                const obj = {
+                    resetLink: "",
+                    password: newPass
+                }
+
+                bcrypt.genSalt(10, (err, salt) => {
+                    bcrypt.hash(newPass, salt, (err, hash) => {
+                        if (err) throw err;
+                        obj.password = hash;
+                    });
+                });
+
+                user = _.extend(user, obj);     
+                user.save()
+                .then(user => res.json(user))
+                .catch(err => console.log(err));
+            });
+        });
+    }
+    else {
+        return res.status(400).json({error: "Reset Link error"});
+    }
+});
+
+module.exports = router; 
