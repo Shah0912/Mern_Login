@@ -134,7 +134,7 @@ router.put("/forgot-password", (req, res) => {
             subject: 'Password Reset Link',
             html: `
                 <h2>Please click on the given link to reset your password</h2>
-                <p><a>${process.env.CLIENT_URL}/resetpassword/${token}</a></p>
+                <p><a href = ${process.env.CLIENT_URL}resetpassword/${token}>Reset Password</a></p>
             `
         };
         // console.log("token = ", token);
