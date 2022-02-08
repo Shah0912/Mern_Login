@@ -26,10 +26,6 @@ mongoose
 
 const router = express.Router();
 
-app.get("/", (req, res) => {
-    res.send();
-    console.log("here")
-});
 
 // Passport middleware
 app.use(passport.initialize());
