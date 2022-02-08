@@ -125,8 +125,8 @@ router.put("/forgot-password", (req, res) => {
                 expiresIn: 8640
             }
         );
-        console.log("token = ", token);
-        console.log("payload = ", payload);
+        // console.log("token = ", token);
+        // console.log("payload = ", payload);
         // const token = jwt.sign({id: user.id}, keys.resetKey, {expiresIn: 100});
         const mailOptions = {
             from : process.env.EMAIL,
