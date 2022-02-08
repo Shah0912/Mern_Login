@@ -17,14 +17,14 @@ export const FormContainer = styled.form`
 
 export const MutedLink = styled.a`
   font-size: 11px;
-  color: rgba(200, 200, 200, 0.8);
+  color: rgba(150, 150, 150, 1);
   font-weight: 500;
   text-decoration: none;
 `;
 
 export const BoldLink = styled.a`
   font-size: 11px;
-  color: rgb(214,162,232);
+  color: rgb(130,88,159);
   font-weight: 500;
   text-decoration: none;
   margin: 0 4px;
@@ -34,23 +34,23 @@ export const Input = styled.input`
   width: 100%;
   height: 42px;
   outline: none;
-  border: 1px solid rgba(200, 200, 200, 0.3);
+  border: 1px solid rgba(150, 150, 150, 0.3);
   padding: 0px 10px;
   border-bottom: 1.4px solid transparent;
   transition: all 200ms ease-in-out;
   font-size: 12px;
 
   &::placeholder {
-    color: rgba(200, 200, 200, 1);
+    color: rgba(150, 150, 150, 1);
   }
 
   &:not(:last-of-type) {
-    border-bottom: 1.5px solid rgba(200, 200, 200, 0.4);
+    border-bottom: 1.5px solid rgba(150, 150, 150, 0.4);
   }
 
   &:focus {
     outline: none;
-    border-bottom: 2px solid rgb(214,162,232);
+    border-bottom: 2px solid rgb(130,88,159);
   }
 `;
 

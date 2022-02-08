@@ -36,6 +36,7 @@ const HeaderText = styled.h2`
   color: #fff;
   z-index: 10;
   margin: 0;
+  text-align: center;
 `;
 
 const backdropVariants = {
