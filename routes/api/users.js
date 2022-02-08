@@ -7,7 +7,7 @@ const _ = require('lodash');
 // require('dotenv');
 require('dotenv').config()
 
-const keys = require("../../config/keys");
+// const keys = require("../../config/keys");
 
 
 // Load input validation
@@ -79,7 +79,7 @@ router.post("/login", (req, res) => {
                 // Sign the token
                 jwt.sign(
                     payload,
-                    keys.secretOrKey, {
+                    process.env.secretOrKey, {
                         expiresIn: 31556926
                     },
                     (err, token) => {
@@ -121,7 +121,7 @@ router.put("/forgot-password", (req, res) => {
 
         const token = jwt.sign(
             payload,
-            keys.resetKey, {
+            process.env.resetKey, {
                 expiresIn: 8640
             }
         );
@@ -181,7 +181,7 @@ router.put('/reset-password', (req, res) => {
     console.log("resetLink = ", resetLink);
     console.log("new Pass = ", newPass);
     if(resetLink) {
-        jwt.verify(resetLink, keys.resetKey, (err, decodedToken) => {
+        jwt.verify(resetLink, process.env.resetKey, (err, decodedToken) => {
             if(err) {
                 console.log("decoded token = ", decodedToken);
                 console.log("err = ", err);
